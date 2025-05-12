@@ -1,0 +1,229 @@
+@use "../../common/mixin" as gm;
+@use "./mixin" as m;
+@mixin section3 {
+	.section3 {
+		overflow: hidden;
+		position: relative;
+		@include gm.respond-to(map-get(gm.$min, 691)) {
+			padding-bottom: 100px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 690)) {
+			padding-bottom: 70px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+	}
+
+	.title_series {
+		max-width: 500px;
+		margin: 0 auto;
+	}
+
+	.series_tab {
+		max-width: 975px;
+		padding: 0 20px;
+
+		@include gm.respond-to(map-get(gm.$min, 691)) {
+			margin: 30px auto 0;
+		}
+		@include gm.respond-to(map-get(gm.$max, 690)) {
+			margin-top: 30px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+
+		.button_tab {
+			width: 125px;
+			height: 40px;
+			border-radius: 30px;
+			background: #bcbcbc;
+
+			color: #fff;
+			text-align: center;
+			font-size: 16px;
+			font-weight: 700;
+			line-height: 40px;
+			letter-spacing: -0.32px;
+
+			&[aria-selected="true"] {
+				$colors: (
+					1: #03ccd4,
+					2: #ffb800,
+					3: #ff6c48,
+					4: #ab6aff,
+					5: #7cc800,
+					6: #2e93ff,
+					7: #ff329a,
+				);
+				@each $i, $color in $colors {
+					&:nth-child(#{$i}) {
+						background: #{$color};
+					}
+				}
+			}
+		}
+	}
+
+	.series_panels {
+		position: relative;
+		max-width: 1175px;
+		margin: 0 auto;
+		@include gm.respond-to(map-get(gm.$min, 986)) {
+			margin-top: 30px;
+			padding: 0 20px;
+
+			&::before,
+			&::after {
+				-webkit-box-sizing: border-box;
+				box-sizing: border-box;
+				content: "";
+				height: 100%;
+				position: absolute;
+				top: 0;
+				width: 100vw;
+				background: #fff;
+			}
+
+			&::before {
+				right: calc(100% - 100px);
+				z-index: 1;
+			}
+
+			&::after {
+				left: calc(100% - 100px);
+			}
+		}
+		@include gm.respond-to(map-get(gm.$max, 985)) {
+			margin-top: 35px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+	}
+
+	.series_card {
+		position: relative;
+
+		@include gm.respond-to(map-get(gm.$min, 986)) {
+			max-width: 1135px;
+			margin: 0 auto;
+			padding: 0 100px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 985)) {
+			padding: 0 20px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+		.slide {
+			@include gm.respond-to(map-get(gm.$min, 986)) {
+				width: calc((100% / 3) - 40px + (40px / 3));
+				max-width: 300px;
+				margin-right: 40px;
+			}
+			@include gm.respond-to(map-get(gm.$max, 985)) {
+				width: 220px;
+				margin-right: 30px;
+			}
+			@include gm.respond-to(map-get(gm.$max, 360)) {
+			}
+		}
+
+		.jswiper_pagination {
+			margin-top: 0;
+
+			button {
+				position: absolute;
+				top: 40%;
+				width: 60px;
+				height: 60px;
+				margin: -30px 0 0;
+				background: #fff;
+				border: 1px solid rgba(0, 0, 0, 0.1);
+				opacity: 0;
+				transition: none;
+				padding: 0;
+
+				&[aria-disabled="true"] {
+					opacity: 0;
+					visibility: hidden;
+				}
+
+				&[aria-disabled="false"] {
+					opacity: 1;
+					visibility: visible;
+				}
+			}
+
+			i {
+				width: 33px;
+				height: 32px;
+				margin: 0;
+				background-image: url("data:image/svg+xml,%0A%3Csvg width='33' height='32' viewBox='0 0 33 32' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M23.0144 15.7767L23.0264 15.7887L12.1794 26.6357L10.4823 24.9386L19.6443 15.7767L10.4823 6.6147L12.1794 4.91764L23.0264 15.7647L23.0144 15.7767Z' fill='%231D1D1D'/%3E%3C/svg%3E");
+			}
+
+			.btn_prev {
+				left: 0;
+			}
+
+			.btn_next {
+				right: 0;
+			}
+
+			.ico_arrow_left {
+				transform: rotateY(180deg);
+				margin-right: 2px;
+			}
+
+			.ico_arrow_right {
+				transform: rotateY(0deg);
+				margin-left: 2px;
+			}
+		}
+	}
+
+	.series_img {
+		img {
+			border-radius: 100%;
+		}
+	}
+
+	.series_title {
+		display: block;
+		color: #111;
+		text-align: center;
+		font-weight: 900;
+		line-height: normal;
+
+		@include gm.respond-to(map-get(gm.$min, 691)) {
+			margin-top: 20px;
+			font-size: 18px;
+			letter-spacing: -0.36px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 690)) {
+			margin-top: 9px;
+			font-size: 16px;
+			letter-spacing: -0.32px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+	}
+
+	.series_desc {
+		color: #666;
+		text-align: center;
+		font-weight: 400;
+		line-height: normal;
+
+		@include gm.respond-to(map-get(gm.$min, 691)) {
+			margin-top: 4px;
+			font-size: 15px;
+			letter-spacing: -0.3px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 690)) {
+			margin-top: 6px;
+			font-size: 13px;
+			letter-spacing: -0.26px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+	}
+}

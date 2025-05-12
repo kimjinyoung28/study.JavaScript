@@ -1,0 +1,82 @@
+@use "../../common/mixin" as gm;
+@use "./mixin" as m;
+
+@mixin section1 {
+	.section1 {
+		max-width: 500px;
+		margin: 0 auto;
+		@include gm.respond-to(map-get(gm.$min, 691)) {
+			padding-bottom: 98px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 690)) {
+			padding-bottom: 70px;
+		}
+	}
+	.records_item {
+		@for $i from 1 through 4 {
+			&:nth-child(#{$i}) {
+				.event_img {
+					&::before {
+						@include gm.respond-to(map-get(gm.$min, 691)) {
+							// background-image: url("#{m.$imgPath}/bg_records#{$i}_m@4x.min.png");
+						}
+						@include gm.respond-to(map-get(gm.$max, 690)) {
+							// background-image: url("#{m.$imgPath}/bg_records#{$i}_m@2x.min.png");
+						}
+						@include gm.respond-to(map-get(gm.$max, 360)) {
+						}
+					}
+					&::after {
+						@include gm.respond-to(map-get(gm.$min, 691)) {
+							// background-image: url("#{m.$imgPath}/bg_records#{$i}_fg_m@4x.min.png");
+						}
+						@include gm.respond-to(map-get(gm.$max, 690)) {
+							// background-image: url("#{m.$imgPath}/bg_records#{$i}_fg_m@2x.min.png");
+						}
+						@include gm.respond-to(map-get(gm.$max, 360)) {
+						}
+					}
+				}
+			}
+		}
+
+		.event_img {
+			overflow: hidden;
+			position: relative;
+			max-width: 500px;
+			margin: 0 auto;
+
+			&::before,
+			&::after {
+				// content: "";
+				// position: absolute;
+				// top: 0;
+				// left: 0;
+				// width: 100%;
+				// height: 100%;
+				// background-repeat: no-repeat;
+				// background-position: 0 0;
+				// background-size: 100% auto;
+			}
+
+			&::after {
+				// opacity: 0;
+				// transform: translateX(20px);
+				// transition: transform 0.5s ease;
+			}
+
+			img {
+				// visibility: hidden;
+			}
+		}
+		&.animated {
+			.event_img {
+				&::after {
+					// opacity: 1;
+					// transform: translateY(0);
+					// transition: transform 0.5s ease;
+				}
+			}
+		}
+	}
+}

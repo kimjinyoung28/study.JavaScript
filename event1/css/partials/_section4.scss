@@ -1,0 +1,25 @@
+@use "../../common/mixin" as gm;
+@use "./mixin" as m;
+
+@mixin section4 {
+	.section4 {
+		background-color: #0e7cf0;
+	}
+	.promotion_title {
+		max-width: 500px;
+		margin: 0 auto;
+	}
+
+	.promotion_wrap {
+		max-width: 500px;
+		margin: 0 auto;
+		@include gm.respond-to(map-get(gm.$min, 691)) {
+			padding-bottom: 111px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 690)) {
+			padding-bottom: 80px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+	}
+}

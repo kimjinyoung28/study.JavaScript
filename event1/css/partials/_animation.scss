@@ -1,0 +1,93 @@
+@use "./mixin" as mixin;
+
+$default-opacity: 0;
+$default-transform: translateY(20px);
+$default-transition: 0.5s ease;
+
+// 애니메이션
+@mixin animation($opacity: $default-opacity, $transform: $default-transform) {
+	opacity: $opacity;
+	transform: $transform;
+	transition: opacity $default-transition, transform $default-transition;
+}
+
+// 기본 애니메이션 초기 상태
+[data-animate] {
+	@include animation();
+
+	@media (min-width: 691px) {
+		transform: scale(0.95);
+	}
+}
+
+[data-animate].animated {
+	@include animation(1, translateY(0));
+
+	@media (min-width: 691px) {
+		transform: scale(1);
+	}
+}
+
+// 방향별 애니메이션
+@mixin slide-animation($direction, $distance) {
+	@if $direction == left {
+		transform: translateX(-#{$distance});
+	} @else if $direction == right {
+		transform: translateX(#{$distance});
+	} @else if $direction == up {
+		transform: translateY(-#{$distance});
+	} @else if $direction == down {
+		transform: translateY(#{$distance});
+	}
+	transition: opacity $default-transition, transform $default-transition;
+}
+
+[data-animate="slide-left"] {
+	@include slide-animation(left, 20px);
+
+	.animated {
+		@include animation(1, translateX(0));
+	}
+}
+
+[data-animate="slide-right"] {
+	@include slide-animation(right, 20px);
+
+	.animated {
+		@include animation(1, translateX(0));
+	}
+}
+
+[data-animate="slide-up"] {
+	@include slide-animation(up, 20px);
+
+	.animated {
+		@include animation(1, translateY(0));
+	}
+}
+
+[data-animate="slide-down"] {
+	@include slide-animation(down, 20px);
+
+	.animated {
+		@include animation(1, translateY(0));
+	}
+}
+
+[data-animate="fade-in"] {
+	opacity: 0;
+	transition: opacity $default-transition;
+
+	.animated {
+		opacity: 1;
+	}
+}
+
+[data-animate="fade-out"] {
+	opacity: 1;
+	transition: opacity $default-transition;
+
+	.animated {
+		opacity: 0;
+	}
+}

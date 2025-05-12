@@ -1,0 +1,155 @@
+@use "../../common/mixin" as gm;
+@use "./mixin" as m;
+@mixin tab {
+	.tab {
+		/*position: sticky;
+		top: 60px;
+		z-index: 10;*/
+
+		@include gm.respond-to(map-get(gm.$min, 691)) {
+			height: 75px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 690)) {
+			height: 48px;
+			padding: 0 20px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+
+		&.active {
+			.tab_links {
+				position: fixed;
+				top: 60px;
+
+				&::before {
+					width: 100vw;
+					border-radius: 0;
+				}
+			}
+
+			.sticky_title {
+				display: flex;
+				align-items: center;
+				position: fixed;
+				top: 0;
+				z-index: 307;
+				height: 60px;
+				color: #fff;
+				@media (max-width: 985px) {
+					display: none;
+				}
+				@media (min-width: 986px) and (max-width: 1279px) {
+					left: calc(50% - 220px) !important;
+					width: 446px !important;
+				}
+				@media (min-width: 1280px) {
+					left: 50%;
+					width: 657px;
+					transform: translateX(-50%);
+				}
+			}
+		}
+	}
+	.sticky_title {
+		display: none;
+	}
+	.tab_links {
+		display: flex;
+		position: relative;
+		left: 50%;
+		z-index: 10;
+		width: 100%;
+		max-width: 500px;
+		padding: 0 20px;
+		transform: translateX(-50%);
+
+		@include gm.respond-to(map-get(gm.$min, 691)) {
+			height: 75px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 690)) {
+			height: 48px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+		&::before {
+			content: "";
+			overflow: hidden;
+			position: absolute;
+			z-index: -1;
+			top: 0;
+			left: 50%;
+			width: 100%;
+			height: 100%;
+			background-color: #7e36f9;
+			border-radius: 50px;
+			box-shadow: 0px 5px 15px 0px rgba(0, 0, 0, 0.25);
+			transform: translateX(-50%);
+		}
+	}
+	.tab_link {
+		display: flex;
+		flex: 1;
+		position: relative;
+
+		@include gm.respond-to(map-get(gm.$min, 691)) {
+			height: 75px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 690)) {
+			height: 48px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+
+		&:first-of-type {
+			&:after {
+				content: "";
+				position: absolute;
+				top: 50%;
+				right: 0;
+				opacity: 0.15;
+				background: #fff;
+				@include gm.respond-to(map-get(gm.$min, 691)) {
+					width: 1.563px;
+					height: 21.875px;
+					margin-top: -11px;
+				}
+				@include gm.respond-to(map-get(gm.$max, 690)) {
+					width: 1px;
+					height: 14px;
+					margin-top: -7px;
+				}
+				@include gm.respond-to(map-get(gm.$max, 360)) {
+				}
+			}
+		}
+
+		.link {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			width: 100%;
+			height: 100%;
+			opacity: 0.3;
+			color: #fff;
+			text-align: center;
+			font-weight: 700;
+			line-height: normal;
+
+			@include gm.respond-to(map-get(gm.$min, 691)) {
+				font-size: 21.875px;
+				letter-spacing: -0.312px;
+			}
+			@include gm.respond-to(map-get(gm.$max, 690)) {
+				font-size: 14px;
+				letter-spacing: -0.2px;
+			}
+			@include gm.respond-to(map-get(gm.$max, 360)) {
+			}
+		}
+		&.active {
+			.link {
+				opacity: 1;
+			}
+		}
+	}
+}

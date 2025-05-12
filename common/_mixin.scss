@@ -1,0 +1,62 @@
+@use "sass:math";
+
+$w300: 300px;
+$w360: 360px;
+$w690: 690px;
+$w691: 691px;
+$w767: 767px;
+$w768: 768px;
+$w985: 985px;
+$w986: 986px;
+$w1023: 1023px;
+$w1024: 1024px;
+$w1200: 1200px;
+$w1279: 1279px;
+$w1280: 1280px;
+
+$max: (
+    360: 'max-width: #{$w360}',
+    690: 'max-width: #{$w690}',
+    767: 'max-width: #{$w767}',
+    985: 'max-width: #{$w985}',
+    1023: 'max-width: #{$w1023}',
+    1279: 'max-width: #{$w1279}'
+);
+
+$min: (
+    691: 'min-width: #{$w691}',
+    768: 'min-width: #{$w768}',
+    986: 'min-width: #{$w986}',
+    1024: 'min-width: #{$w1024}',
+    1200: 'min-width: #{$w1200}',
+    1280: 'min-width: #{$w1280}'
+);
+
+@mixin line-clamp($val) {
+    @if ($val == 1) {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    } @else {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: $val;
+        overflow: hidden;
+    }
+}
+
+@mixin respond-to($valMin, $valMax: false) {
+    @if ($valMax) {
+        @media (#{$valMin}) and (#{$valMax}) {
+            @content;
+        }
+    } @else {
+        @media (#{$valMin}) {
+            @content;
+        }
+    }
+}
+
+@function vw($val, $width: 360) {
+    @return math.div($val, $width) * 100vw;
+}

@@ -1,0 +1,88 @@
+@use "sass:math";
+@use "../../common/mixin" as gm;
+@use "./mixin" as m;
+
+@mixin share {
+	.share {
+		background: #f3f4f6;
+		@include gm.respond-to(map-get(gm.$min, 691)) {
+			padding: 57px 0 80px;
+		}
+		@include gm.respond-to(map-get(gm.$max, 690)) {
+			padding: 60px 0;
+		}
+		@include gm.respond-to(map-get(gm.$max, 360)) {
+		}
+	}
+
+	.share {
+		&_title {
+			color: #111;
+			text-align: center;
+			font-weight: 700;
+			line-height: normal;
+			@include gm.respond-to(map-get(gm.$min, 691)) {
+				font-size: 28px;
+				letter-spacing: -0.56px;
+			}
+			@include gm.respond-to(map-get(gm.$max, 690)) {
+				font-size: 18px;
+				letter-spacing: -0.36px;
+			}
+			@include gm.respond-to(map-get(gm.$max, 360)) {
+			}
+		}
+
+		&_items {
+			display: flex;
+			justify-content: center;
+
+			@include gm.respond-to(map-get(gm.$min, 691)) {
+				margin-top: 22px;
+			}
+			@include gm.respond-to(map-get(gm.$max, 690)) {
+				margin-top: 24px;
+			}
+			@include gm.respond-to(map-get(gm.$max, 360)) {
+			}
+		}
+
+		$shares: kakao, facebook, x, copy;
+
+		&_item {
+			+ .share_item {
+				@include gm.respond-to(map-get(gm.$min, 691)) {
+					margin-left: 20px;
+				}
+				@include gm.respond-to(map-get(gm.$max, 690)) {
+					margin-left: 16px;
+				}
+				@include gm.respond-to(map-get(gm.$max, 360)) {
+				}
+			}
+
+			[type="button"] {
+				aspect-ratio: 1;
+				background-repeat: no-repeat;
+				background-size: 100% auto;
+				background-position: 50% 50%;
+				@include gm.respond-to(map-get(gm.$min, 691)) {
+					width: 60px;
+					height: 60px;
+				}
+				@include gm.respond-to(map-get(gm.$max, 690)) {
+					width: 48px;
+					height: 48px;
+				}
+				@include gm.respond-to(map-get(gm.$max, 360)) {
+				}
+			}
+
+			@each $share in $shares {
+				.button_#{$share} {
+					background-image: url("#{m.$imgPath}/bg_icon_#{$share}@2x.min.png");
+				}
+			}
+		}
+	}
+}

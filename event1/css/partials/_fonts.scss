@@ -1,0 +1,46 @@
+@use "sass:list";
+
+$fontPath: "https://static.joongang.co.kr/css/subset-fonts";
+
+$extensions: (
+	woff2: woff2,
+	woff: woff,
+	otf: opentype,
+);
+
+$fonts: (
+	Thin: 100,
+	Light: 300,
+	Regular: 400,
+	Medium: 500,
+	Bold: 700,
+	Black: 900,
+);
+
+@function generatorFonts($name) {
+	$src: "";
+	@each $extension, $type in $extensions {
+		$index: list.index($extensions, $extension);
+		$current: url("#{$fontPath}/NotoSansKR-#{$name}.#{$extension}") #{"format" }("#{$type}");
+
+		@if ($index == 2) {
+			$src: #{$src}, #{$current};
+		} @else {
+			$src: #{$src}, #{$current};
+		}
+	}
+
+	@return $src;
+}
+
+@mixin fonts {
+	@each $name, $weight in $fonts {
+		@font-face {
+			font-family: "Noto Sans KR";
+			font-display: swap;
+			font-style: normal;
+			font-weight: $weight;
+			src: generatorFonts($name);
+		}
+	}
+}

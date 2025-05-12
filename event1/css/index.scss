@@ -1,0 +1,82 @@
+@forward "./partials/animation";
+
+@use "../common/mixin" as gm;
+@use "./partials/mixin" as m;
+@use "./partials/fonts" as fonts;
+@use "./partials/visual" as visual;
+@use "./partials/tab" as tab;
+@use "./partials/sticky" as sticky;
+@use "./partials/section1" as section1;
+@use "./partials/section2" as section2;
+@use "./partials/section3" as section3;
+@use "./partials/section4" as section4;
+@use "./partials/share" as share;
+
+@include fonts.fonts;
+
+body {
+	overflow-x: hidden;
+}
+
+#container {
+	.contents {
+		max-width: 100% !important;
+		padding: 60px 0 0 !important;
+	}
+}
+
+.contents {
+	img {
+		width: 100%;
+		height: auto;
+	}
+}
+
+[data-app="true"] {
+	&[data-scroll="up"] {
+		.sticky {
+			@include gm.respond-to(map-get(gm.$max, 690)) {
+				bottom: 90px;
+			}
+			@include gm.respond-to(map-get(gm.$max, 360)) {
+			}
+		}
+	}
+}
+
+.button_message,
+.button_confirm,
+.button_apply {
+	display: block;
+	margin: 0 auto;
+	border-radius: 33px;
+	background-color: #000;
+	color: #fff;
+	text-align: center;
+	font-weight: 700;
+	line-height: normal;
+
+	@include gm.respond-to(map-get(gm.$min, 691)) {
+		width: 500px;
+		height: 66px;
+		font-size: 21.875px;
+		letter-spacing: -0.312px;
+	}
+	@include gm.respond-to(map-get(gm.$max, 690)) {
+		width: 320px;
+		height: 48px;
+		font-size: 16px;
+		letter-spacing: -0.32px;
+	}
+	@include gm.respond-to(map-get(gm.$max, 360)) {
+	}
+}
+
+@include visual.visual;
+@include tab.tab;
+@include sticky.sticky;
+@include section1.section1;
+@include section2.section2;
+@include section3.section3;
+@include section4.section4;
+@include share.share;

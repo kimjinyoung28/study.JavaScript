@@ -1,0 +1,66 @@
+@use "../../common/mixin" as gm;
+@use "./mixin" as m;
+
+@mixin visual {
+	.visual {
+		.visual_img {
+			overflow: hidden;
+			position: relative;
+			max-width: 500px;
+			margin: 0 auto;
+
+			&::before,
+			&::after {
+				content: "";
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-repeat: no-repeat;
+				background-position: 0 0;
+				background-size: 100% auto;
+			}
+
+			&::before {
+				background-image: url("#{m.$imgPath}/bg_visual_m_0121@4x.min.png");
+				@include gm.respond-to(map-get(gm.$min, 691)) {
+					// background-image: url("#{m.$imgPath}/bg_visual_m_0121@4x.min.png");
+				}
+				@include gm.respond-to(map-get(gm.$max, 690)) {
+					// background-image: url("#{m.$imgPath}/bg_visual_m_0121@2x.min.png");
+				}
+				@include gm.respond-to(map-get(gm.$max, 360)) {
+				}
+			}
+
+			&::after {
+				background-image: url("#{m.$imgPath}/bg_visual_fg_m@4x.min.png");
+				animation: aniVisual 0.5s ease;
+				@include gm.respond-to(map-get(gm.$min, 691)) {
+					background-image: url("#{m.$imgPath}/bg_visual_fg_m@4x.min.png");
+				}
+				@include gm.respond-to(map-get(gm.$max, 690)) {
+					// background-image: url("#{m.$imgPath}/bg_visual_fg_m@2x.min.png");
+				}
+				@include gm.respond-to(map-get(gm.$max, 360)) {
+				}
+			}
+
+			img {
+				visibility: hidden;
+			}
+		}
+	}
+
+	@keyframes aniVisual {
+		0% {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+}
