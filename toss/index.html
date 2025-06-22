@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Toss Style Scroll Interaction</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .scroll-section {
+      height: 500vh;
+      position: relative;
+    }
+
+    .sticky-container {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #intro-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .text-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .scroll-text {
+      font-size: 4rem;
+      font-weight: bold;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+      opacity: 0;
+      position: absolute;
+      white-space: nowrap;
+      transition: transform 0.3s ease-out;
+    }
+
+    .scroll-text.stay {
+      opacity: 1;
+    }
+
+    .after-scroll-section {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      background-color: #111;
+    }
+
+    /* PC 위치 설정 */
+    @media (min-width: 768px) {
+      #text1 {
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      #text2 {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      #text3 {
+        top: 40%;
+        left: 56%;
+        transform: translate(-50%, -50%);
+      }
+      #text4, #text5, #text6 {
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    /* 모바일 위치 설정 */
+    @media (max-width: 767px) {
+      #text1 {
+        top: 35%;
+        left: 50%;
+        transform: translate(-50%, -60%);
+      }
+      #text2 {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      #text3, #text4, #text5, #text6 {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="scroll-section">
+    <div class="sticky-container">
+      <video id="intro-background" preload="auto" muted playsinline webkit-playsinline>
+        <source src="https://static.toss.im/homepage-static/newtoss/intro-video.mp4" type="video/mp4" />
+      </video>
+
+      <div class="text-container">
+        <div class="scroll-text stay" id="text1">당신의</div>
+        <div class="scroll-text stay" id="text2">깊어지는 중</div>
+        <div class="scroll-text" id="text3">재테크가</div>
+        <div class="scroll-text" id="text4">육아가</div>
+        <div class="scroll-text" id="text5">취향이</div>
+        <div class="scroll-text" id="text6">세상이</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="after-scroll-section">
+    <p>애니메이션이 끝났습니다.</p>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const video = document.getElementById("intro-background");
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+
+    video.addEventListener("loadedmetadata", () => {
+      ScrollTrigger.create({
+        trigger: ".scroll-section",
+        start: "top top",
+        end: "bottom bottom",
+        scrub: true,
+        pin: ".sticky-container",
+        onUpdate: self => {
+          if (!isNaN(video.duration)) {
+            video.currentTime = video.duration * self.progress;
+          }
+        }
+      });
+    });
+
+    const phrases = ["#text3", "#text4", "#text5", "#text6"];
+    const step = 20;
+
+    phrases.forEach((id, index) => {
+      const enterStart = `${10 + step * index}% center`;
+      const enterEnd = `${20 + step * index}% center`;
+      const exitStart = `${25 + step * index}% center`;
+      const exitEnd = `${30 + step * index}% center`;
+
+      // 등장 애니메이션
+      gsap.fromTo(id,
+        {
+          x: isMobile ? 0 : "100px",
+          opacity: 0
+        },
+        {
+          x: 0,
+          opacity: 1,
+          scrollTrigger: {
+            trigger: ".scroll-section",
+            start: enterStart,
+            end: enterEnd,
+            scrub: true
+          }
+        }
+      );
+
+      // 문구6은 사라지지 않음
+      if (id !== "#text6") {
+        gsap.to(id, {
+          x: isMobile ? 0 : "0px",
+          opacity: 0,
+          scrollTrigger: {
+            trigger: ".scroll-section",
+            start: exitStart,
+            end: exitEnd,
+            scrub: true
+          }
+        });
+      }
+    });
+
+    // 당신의 텍스트 이동
+    gsap.to("#text1", {
+      x: isMobile ? 0 : "-200px",
+      y: isMobile ? "-30vh" : 0,
+      scrollTrigger: {
+        trigger: ".scroll-section",
+        start: "top top",
+        end: "20% center",
+        scrub: true
+      }
+    });
+  </script>
+</body>
+</html>

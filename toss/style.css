@@ -1,0 +1,40 @@
+/* 비디오 배경 */
+.video-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+.tossteam-video-1p9vbdz {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* 문구들 */
+.text-section, .next-section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.text {
+  font-size: 3rem;
+  font-weight: bold;
+  opacity: 0; /* Initially hidden */
+  transform: translateY(50px); /* 약간 아래에서 올라오는 효과 */
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* 섹션 2 스타일 */
+.next-section {
+  padding: 50px;
+  background-color: #f0f0f0;
+}
