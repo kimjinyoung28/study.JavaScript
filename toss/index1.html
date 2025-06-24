@@ -35,12 +35,11 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            display: flex;
-            flex-direction: column;
+            display: flex; /* Flexbox로 자식 요소 정렬 */
+            flex-direction: column; /* 세로 정렬 */
             justify-content: center;
             align-items: center;
             
-            /* [수정] 가시성을 위한 텍스트 스타일 변경 */
             color: #fff; /* 어두운 색상으로 변경 */
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* 그림자 추가 */
 
@@ -51,16 +50,27 @@
             z-index: 10; /* 다른 요소들보다 위에 보이도록 설정 */
         }
         
-        /* 변하는 텍스트들의 기본 스타일 및 위치 설정 */
-        .changing-text {
-            position: absolute;
-            opacity: 0;
+        /* [핵심 수정] 텍스트 그룹화를 위한 .aa 클래스 */
+        .aa {
+            position: relative; /* 자식 absolute 기준 */
+            display: flex; /* Flexbox로 내부 텍스트를 가로로 정렬 */
+            align-items: center; /* 세로 중앙 정렬 */
+            justify-content: center; /* 가로 중앙 정렬 */
+            /* width: 100%; 제거 - 텍스트 내용에 맞게 너비 조절 */
         }
 
-        /* [수정] 스크롤 트리거 역할을 할 빈 공간 */
-        .scroll-section {
-            height: 400vh; /* 애니메이션을 위한 충분한 스크롤 공간 */
-            position: relative;
+        /* 변하는 텍스트들의 기본 스타일 및 위치 설정 */
+        .changing-text {
+            position: absolute; /* .aa 기준으로 위치 */
+            opacity: 0;
+            /* [수정] 모바일에서 y 이동을 위한 기본값으로 y:0 설정 */
+            transform: translate(0, 0); 
+            /* `left: 50%`는 제거합니다. Flexbox 내부에서 직접 위치를 잡게 됩니다. */
+        }
+
+        .changing-text {
+            position: absolute;
+            white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
         }
 
         /* 모바일 화면 대응 */
@@ -68,6 +78,35 @@
             .text-container {
                 font-size: 2.5rem;
             }
+            /* 모바일에서는 .aa를 column으로 변경하여 텍스트가 세로로 쌓이도록 */
+            .aa {
+                flex-direction: column;
+            }
+            /* 모바일에서 changing-text의 위치 초기화 */
+            .changing-text {
+                left: 50%;
+                top: 50%;
+            }
+        }
+
+        /* [수정] PC 화면 (769px 이상) 전용 스타일 */
+        @media (min-width: 769px) {
+            /* PC에서는 changing-text의 위치를 text1 옆으로 정확히 조정 */
+            .changing-text {
+                /* text1 옆에 오도록 left 값을 조정. 필요에 따라 미세 조정 */
+                left: 100%;  /* text1의 오른쪽 끝에 위치 */
+                top: 0; /* text1과 같은 수직선상에 위치 */
+            }
+            /* text1 자체는 relative로 두어 changing-text의 absolute 기준점 제공 */
+            #text1 {
+                position: relative;
+            }
+        }
+
+        /* 스크롤 트리거 역할을 할 빈 공간 */
+        .scroll-section {
+            height: 400vh; /* 애니메이션을 위한 충분한 스크롤 공간 */
+            position: relative;
         }
 
         /* 다음 섹션 */
@@ -79,25 +118,9 @@
             background-color: #1a1a1a;
             color: #fff;
             font-size: 3rem;
-            position: relative; /* z-index가 적용되도록 */
+            position: relative;
             z-index: 5;
         }
-
-        @media (min-width: 769px) {
-            .aa {
-                position: relative;
-                width: 100%;
-            }
-
-            #text1, #text3, #text4, #text5, #text6 {
-                top: 0;
-            }
-
-            #text3, #text4, #text5, #text6 {
-                left: 50%;
-            }
-        }
-
     </style>
 </head>
 <body>
@@ -107,8 +130,7 @@
 
     <div class="text-container">
         <div class="aa">
-            <div id="text1">당신의</div>
-            
+            <div id="text1">당신의&nbsp;</div>
             <div class="changing-text" id="text3">재테크가</div>
             <div class="changing-text" id="text4">육아가</div>
             <div class="changing-text" id="text5">취향이</div>
@@ -129,56 +151,92 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
     <script>
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+        location.reload();
+        }, 500); // 리사이즈 종료 0.5초 후 새로고침
+    });
+
         gsap.registerPlugin(ScrollTrigger);
 
         const video = document.getElementById('intro-background');
+        // isMobile은 페이지 로드 시점에 한 번만 결정됩니다.
+        // 창 크기 변경 시 실시간 업데이트를 원한다면 ScrollTrigger.matchMedia를 사용해야 합니다.
+        const isMobile = window.matchMedia("(max-width: 768px)").matches; // 기준을 768px로 통일
 
         video.onloadedmetadata = function() {
-            
+            // 모든 GSAP 애니메이션/트윈을 초기화하여 충돌 방지
+            gsap.set(["#text1", "#text2", "#text3", "#text4", "#text5", "#text6"], { clearProps: "all" });
+            gsap.set(".changing-text", { opacity: 0 }); // 변경되는 텍스트들은 초기엔 숨김
+
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: ".scroll-section", 
                     start: "top top",         
                     end: "bottom bottom",     
                     scrub: 1.5,                
-                    // [수정] pin 속성 제거 (text-container가 fixed 이므로 불필요)
                     onUpdate: self => {
                         if (video.duration) {
                            video.currentTime = video.duration * self.progress;
                         }
                     }
+                    // markers: true // 디버깅용
                 }
             });
 
-            ScrollTrigger.matchMedia({
-                "(min-width: 769px)": function() {
-                    tl.to("#text1", { x: -100, ease: "power1.inOut" })
-                      .to("#text3", { x: -100, opacity: 1, ease: "power1.inOut" }, "<");
-                },
-                "(max-width: 768px)": function() {
-                    tl.to("#text1", { y: -50, ease: "power1.inOut" })
-                      .to("#text2", { y: 50, ease: "power1.inOut" }, "<")
-                      .to("#text3", { opacity: 1, ease: "power1.inOut" }, "<");
-                }
-            });
-
-            tl.to("#text3", { opacity: 0, duration: 0.3 }, "+=0.8")
-              .to("#text4", { x: -100, opacity: 1, duration: 0.3 }, "<");
-
-            tl.to("#text4", { opacity: 0, duration: 0.3 }, "+=0.8")
-              .to("#text5", { x: -100, opacity: 1, duration: 0.3 }, "<");
-
-            tl.to("#text5", { opacity: 0, duration: 0.3 }, "+=0.8")
-              .to("#text6", { x: -100, opacity: 1, duration: 0.3 }, "<");
+            // PC와 모바일의 초기/등장/사라짐 애니메이션 속성 정의
+            let text1InitialX = isMobile ? 0 : -100;
+            let text1MoveY = isMobile ? -50 : 0;
+            let text2MoveY = isMobile ? 50 : 0;
             
+            let changingTextEnterX = isMobile ? "-50%" : -100; // 등장할 때의 x 위치
+            let changingTextExitX = isMobile ? "-50%" : -100; // 사라질 때의 x 위치 (더 멀리)
+            let changingTextFromX = isMobile ? "-50%" : 0; // 새로 등장할 텍스트의 초기 x 위치 (PC는 left:100% 기준)
+
+            // 초기 위치 설정 (GSAP가 애니메이션 시작 전에 상태를 명확히 알도록)
+            gsap.set("#text1", { x: 0, y: 0 });
+            gsap.set("#text2", { y: 0 });
+            gsap.set(".changing-text", { x: 0 }); // PC는 left:100% 기준 0, 모바일은 relative 기준 0
+
+            // 첫 번째 텍스트 애니메이션 (PC/모바일 조건부)
+            if (isMobile) {
+                tl.to("#text1", { y: text1MoveY, ease: "power1.inOut" });
+                tl.to("#text2", { y: text2MoveY, ease: "power1.inOut" }, "<");
+                tl.to("#text3", { opacity: 1, x: changingTextEnterX, ease: "power1.inOut" }, "<");
+            } else { // PC
+                tl.to("#text1", { x: text1InitialX, ease: "power1.inOut" }); // PC에서는 x만 사용
+                tl.to("#text3", { opacity: 1, x: changingTextEnterX, ease: "power1.inOut" }, "<");
+            }
+
+            // 변경되는 텍스트들 애니메이션 (공통 로직, x 값만 isMobile로 조건부)
+            // #text3 사라지고 #text4 등장
+            tl.to("#text3", { opacity: 0, x: changingTextExitX, duration: 0.3 }, "+=0.8");
+            tl.fromTo("#text4", 
+                { opacity: 0, x: changingTextFromX }, // from: 시작 위치
+                { opacity: 1, x: changingTextEnterX, duration: 0.3, ease: "power1.inOut" }, "<"); // to: 최종 위치
+
+            // #text4 사라지고 #text5 등장
+            tl.to("#text4", { opacity: 0, x: changingTextExitX, duration: 0.3 }, "+=0.8");
+            tl.fromTo("#text5", 
+                { opacity: 0, x: changingTextFromX }, 
+                { opacity: 1, x: changingTextEnterX, duration: 0.3, ease: "power1.inOut" }, "<");
+
+            // #text5 사라지고 #text6 등장
+            tl.to("#text5", { opacity: 0, x: changingTextExitX, duration: 0.3 }, "+=0.8");
+            tl.fromTo("#text6", 
+                { opacity: 0, x: changingTextFromX }, 
+                { opacity: 1, x: changingTextEnterX, duration: 0.3, ease: "power1.inOut" }, "<");
+            
+            // 마지막 텍스트 전체 사라짐 애니메이션 (공통)
             tl.to(["#text1", "#text2", "#text6"], { 
-                scale: 1.5, 
+                scale: 6, 
                 opacity: 0, 
-                //filter: "blur(20px)",
-                scale: 6,
+                filter: "blur(20px)", 
                 ease: "power2.inOut",
                 duration: 1
-            }, "+=1.2");
+            }, "+=1.2"); 
         };
     </script>
 </body>
