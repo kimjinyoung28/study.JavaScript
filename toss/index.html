@@ -1,283 +1,182 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Toss Style Scroll Interaction</title>
-  <!-- link rel="stylesheet" href="style.css" -->
-   <style>
-    body {
-      margin: 0;
-      background-color: #000;
-      color: white;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      overflow-x: hidden;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP & ScrollTrigger - Toss Intro Example</title>
+    <style>
+        /* 기본 스타일 초기화 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .scroll-section {
-      height: 500vh;
-      position: relative;
-    }
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
 
-    .sticky-container {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow: hidden;
-    }
+        /* 스크롤 애니메이션이 일어날 전체 섹션 */
+        .scroll-section {
+            /* 애니메이션을 위한 충분한 스크롤 공간 확보 (400vh = 4배 화면 높이) */
+            height: 400vh;
+            position: relative;
+        }
+        
+        /* 비디오 스타일 */
+        #intro-background {
+            position: sticky; /* 스크롤 동안 상단에 고정 */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover; /* 화면 비율에 맞게 꽉 채움 */
+            z-index: -1; /* 다른 콘텐츠 뒤로 보냄 */
+        }
+        
+        /* 텍스트를 감싸는 컨테이너 */
+        .text-container {
+            position: sticky; /* 스크롤 동안 상단에 고정 */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+            z-index: ;
+        }
+        
+        /* 변하는 텍스트들의 기본 스타일 및 위치 설정 */
+        .changing-text {
+            position: absolute; /* 모든 텍스트를 같은 위치에 겹침 */
+            opacity: 0; /* 처음에는 보이지 않도록 설정 */
+        }
 
-    #intro-background {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -1;
-    }
+        /* 모바일 화면 대응 */
+        @media (max-width: 768px) {
+            .text-container {
+                font-size: 2.5rem;
+            }
+        }
 
-    .text-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 320px;
-      height: 160px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-    }
+        /* 다음 섹션 (애니메이션 종료 후 나타남) */
+        .next-section {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a1a1a;
+            font-size: 3rem;
+        }
 
-    @media (min-width: 768px) {
-      .text-container {
-        width: 500px;
-      }
-    }
-
-    .scroll-text {
-      font-size: 3rem;
-      font-weight: bold;
-      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
-      opacity: 0;
-      position: absolute;
-      white-space: nowrap;
-      transition: transform 0.3s ease-out;
-      text-align: center;
-    }
-
-    @media (min-width: 768px) {
-      .scroll-text {
-        font-size: 4rem;
-      }
-    }
-
-    @media (max-width: 767px) {
-      .scroll-text {
-        width: 100%;
-      }
-    }
-
-    .scroll-text.stay {
-      opacity: 1;
-    }
-
-    .after-scroll-section {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2rem;
-      background-color: #111;
-    }
-
-    #text2 {
-        bottom: 0;
-        left: 50%;
-        width: 100%;
-        transform: translate(-50%, 0);
-        text-align: center;
-    }
-
-    /* PC 위치 설정 */
-    @media (min-width: 768px) {
-      #text1 {
-        top: 0;
-        left: 50%;
-        transform: translate(-50%, 0);
-      }
-      #text3 {
-        top: 0;
-        left: 72%;
-        transform: translate(-50%, 0);
-      }
-      #text4, #text5, #text6 {
-        top: 0;
-        left: 68%;
-        transform: translate(-50%, 0);
-      }
-    }
-
-    /* 모바일 위치 설정 */
-    @media (max-width: 767px) {
-      #text1 {
-        top: 0;
-        left: 50%;
-        transform: translate(-50%, 0);
-      }
-      #text3, #text4, #text5, #text6 {
-        top: 50%;
-        left: 0;
-        width: 100%;
-        transform: translate(0, -50%);
-        text-align: center;
-      }
-    }
-   </style>
+    </style>
 </head>
 <body>
 
-  <section class="scroll-section">
-    <div class="sticky-container">
-      <video id="intro-background" preload="auto" muted playsinline webkit-playsinline>
-        <source src="https://static.toss.im/homepage-static/newtoss/intro-video.mp4" type="video/mp4" />
-      </video>
+    <main>
+        <section class="scroll-section">
+            <video class="tossteam-video-1p9vbdz" poster="https://common-fe.toss.im/resources/adaptive?light=https%3A%2F%2Fcore-cdn-fe.toss.im%2Fvideo%2Fframe%2F%3Fsource%3Dhttps%3A%2F%2Fstatic.toss.im%2Fhomepage-static%2Fnewtoss%2Fintro-video.mp4%26t%3D00%3A00%3A00.000" loop playsinline id="intro-background" webkit-playsinline="true" preload="auto" muted="true">
+                <source src="https://static.toss.im/homepage-static/newtoss/intro-video.mp4" type="video/mp4">
+            </video>
 
-      <div class="text-container">
-        <div class="scroll-text stay" id="text1">당신의</div>
-        <div class="scroll-text stay" id="text2">깊어지는 중</div>
-        <div class="scroll-text" id="text3">재테크가</div>
-        <div class="scroll-text" id="text4">육아가</div>
-        <div class="scroll-text" id="text5">취향이</div>
-        <div class="scroll-text" id="text6">세상이</div>
-      </div>
-    </div>
-  </section>
+            <div class="text-container">
+                <div id="text1">당신의</div>
+                
+                <div class="changing-text" id="text3">재테크가</div>
+                <div class="changing-text" id="text4">육아가</div>
+                <div class="changing-text" id="text5">취향이</div>
+                <div class="changing-text" id="text6">세상이</div>
 
-  <section class="after-scroll-section">
-    <p>애니메이션이 끝났습니다.</p>
-  </section>
+                <div id="text2">깊어지는 중</div>
+            </div>
+        </section>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script>
-let resizeTimer;
-window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-    location.reload();
-    }, 500); // 리사이즈 종료 0.5초 후 새로고침
-});
-  
-  gsap.registerPlugin(ScrollTrigger);
+        <section class="next-section">
+            <h1>다음 섹션</h1>
+        </section>
+    </main>
 
-  const video    = document.getElementById("intro-background");
-  const isMobile = window.matchMedia("(max-width:767px)").matches;
-  const phrases  = ["#text3","#text4","#text5","#text6"];
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
-  // 1) 비디오 동기화
-  video.addEventListener("loadedmetadata", () => {
-    ScrollTrigger.create({
-      trigger: ".scroll-section",
-      start:   "top top",
-      end:     "bottom bottom",
-      scrub:   true,
-      pin:     ".sticky-container",
-      onUpdate: st => video.currentTime = video.duration * st.progress
-    });
-  });
+    <script>
+        // GSAP에 ScrollTrigger 플러그인 등록
+        gsap.registerPlugin(ScrollTrigger);
 
-  // 2) “당신의” / “깊어지는 중” 이동
-  gsap.to("#text1", {
-    x: isMobile ? "-50%" : "-100px",
-    y: isMobile ? "-2vh" : "0",
-    scrollTrigger:{
-      trigger: ".scroll-section",
-      start:   "top top",
-      end:     "20% center",
-      scrub:   true
-    }
-  });
-  gsap.to("#text2", {
-    x: 0,
-    y: isMobile ? "2vh" : "0",
-    scrollTrigger:{
-      trigger: ".scroll-section",
-      start:   "top top",
-      end:     "20% center",
-      scrub:   true
-    }
-  });
+        const video = document.getElementById('intro-background');
 
-  // 3) text3~6 초기 세팅
-  gsap.set(phrases, {
-    opacity: 0,
-    x:       isMobile ? 0 : 50
-  });
+        // 비디오 메타데이터가 로드된 후 애니메이션 실행 (비디오 총 길이를 알아야 하므로)
+        video.onloadedmetadata = function() {
+            
+            // GSAP 타임라인 생성
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: ".scroll-section", // 애니메이션 기준점
+                    start: "top top",          // 섹션의 최상단이 뷰포트 최상단에 닿을 때 시작
+                    end: "bottom bottom",      // 섹션의 최하단이 뷰포트 최하단에 닿을 때 종료
+                    scrub: 1.5,                // 스크롤과 애니메이션을 1.5초 지연으로 부드럽게 연결
+                    pin: ".text-container",    // 스크롤 동안 .text-container를 고정
+                    onUpdate: self => {
+                        // 스크롤 진행도에 따라 비디오의 재생 시간을 업데이트
+                        if (video.duration) {
+                           video.currentTime = video.duration * self.progress;
+                        }
+                    }
+                }
+            });
 
-  // 4) text3~5: 기존 onToggle 구간마다 fade in/out
-  const scrollPoints = [
-    { start: "20% center", end: "35% center" }, // 재테크가
-    { start: "35% center", end: "50% center" }, // 육아가
-    { start: "50% center", end: "65% center" }  // 취향이
-  ];
-  phrases.slice(0,3).forEach((sel, i) => {
-    const pt = scrollPoints[i];
-    ScrollTrigger.create({
-      trigger: ".scroll-section",
-      start:   pt.start,
-      end:     pt.end,
-      scrub:   true,
-      onToggle(self) {
-        gsap.to(sel, {
-          opacity: self.isActive ? 1 : 0,
-          x:       self.isActive ? 0 : (isMobile ? 0 : 50),
-          duration: 0.3
-        });
-      }
-    });
-  });
+            // 반응형 애니메이션 설정
+            ScrollTrigger.matchMedia({
+                
+                // PC (769px 이상)
+                "(min-width: 769px)": function() {
+                    // 1. '당신의' 왼쪽으로 이동, '재테크가' 페이드인하며 왼쪽으로 이동
+                    tl.to("#text1", { x: -100, ease: "power1.inOut" })
+                      .to("#text3", { x: -100, opacity: 1, ease: "power1.inOut" }, "<"); // "<"는 이전 애니메이션과 동시에 시작
+                },
 
-  // 5) text6(세상이): 65–80% 구간에 진입하면 fadeIn만, 빠져나가도 유지
-  ScrollTrigger.create({
-    trigger: ".scroll-section",
-    start:   "65% center",
-    end:     "80% center",
-    scrub:   true,
-    onEnter: self => {
-      gsap.to("#text6", {
-        opacity: 1,
-        x:       0,
-        duration: 0.3
-      });
-    },
-    onLeaveBack: self => {
-      // 위로 스크롤로 돌아갈 때만 숨기기
-      gsap.to("#text6", {
-        opacity: 0,
-        x:       isMobile ? 0 : 50,
-        duration: 0.3
-      });
-    }
-  });
+                // 모바일 (768px 이하)
+                "(max-width: 768px)": function() {
+                    // 1. '당신의' 위로, '깊어지는 중' 아래로 이동, '재테크가' 중앙에서 페이드인
+                    tl.to("#text1", { y: -50, ease: "power1.inOut" })
+                      .to("#text2", { y: 50, ease: "power1.inOut" }, "<")
+                      .to("#text3", { opacity: 1, ease: "power1.inOut" }, "<");
+                }
+            });
 
-  // 6) 마지막 컨테이너 확대·페이드아웃 (80%→100%)
-  gsap.to(".text-container", {
-    scale:    isMobile ? 6 : 6,
-    opacity:  0,
-    scrollTrigger:{
-      trigger: ".scroll-section",
-      start:   "80% center",
-      end:     "100% center",
-      scrub:   true
-    }
-  });
-</script>
+            // --- 여기부터는 PC/모바일 공통 애니메이션 ---
 
+            // 2. '재테크가' -> '육아가'로 변경
+            tl.to("#text3", { opacity: 0, duration: 0.3 }, "+=0.8") // 0.8초 대기 후 실행
+              .to("#text4", { opacity: 1, duration: 0.3 }, "<");
 
+            // 3. '육아가' -> '취향이'로 변경 (요청사항에는 없었지만 HTML 구조에 있어 추가)
+            tl.to("#text4", { opacity: 0, duration: 0.3 }, "+=0.8")
+              .to("#text5", { opacity: 1, duration: 0.3 }, "<");
 
+            // 4. '취향이' -> '세상이'로 변경
+            tl.to("#text5", { opacity: 0, duration: 0.3 }, "+=0.8")
+              .to("#text6", { opacity: 1, duration: 0.3 }, "<");
+            
+            // 5. 모든 텍스트 확대 및 페이드아웃
+            tl.to(["#text1", "#text2", "#text6"], { 
+                scale: 1.5, 
+                opacity: 0, 
+                filter: "blur(5px)", // 블러 효과를 추가하여 더 부드럽게 사라지게 함
+                ease: "power2.inOut",
+                duration: 1
+            }, "+=1.2"); // 1.2초 대기 후 실행
+        };
 
+    </script>
 
 </body>
 </html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSAP & ScrollTrigger - Toss Intro (수정본)</title>
+    <style>
+        /* 기본 스타일 초기화 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        /* 배경 비디오: 화면 전체에 고정 */
+        #intro-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: -1; /* 다른 모든 콘텐츠의 배경 역할 */
+        }
+        
+        /* 텍스트 컨테이너: 브라우저 화면 정중앙에 고정 */
+        .text-container {
+            position: fixed; /* 브라우저 뷰포트 기준으로 위치 고정 */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            
+            /* [수정] 가시성을 위한 텍스트 스타일 변경 */
+            color: #fff; /* 어두운 색상으로 변경 */
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* 그림자 추가 */
+
+            font-size: 4rem;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+            z-index: 10; /* 다른 요소들보다 위에 보이도록 설정 */
+        }
+        
+        /* 변하는 텍스트들의 기본 스타일 및 위치 설정 */
+        .changing-text {
+            position: absolute;
+            opacity: 0;
+        }
+
+        /* [수정] 스크롤 트리거 역할을 할 빈 공간 */
+        .scroll-section {
+            height: 400vh; /* 애니메이션을 위한 충분한 스크롤 공간 */
+            position: relative;
+        }
+
+        /* 모바일 화면 대응 */
+        @media (max-width: 768px) {
+            .text-container {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* 다음 섹션 */
+        .next-section {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a1a1a;
+            color: #fff;
+            font-size: 3rem;
+            position: relative; /* z-index가 적용되도록 */
+            z-index: 5;
+        }
+
+        @media (min-width: 769px) {
+            .aa {
+                position: relative;
+                width: 100%;
+            }
+
+            #text1, #text3, #text4, #text5, #text6 {
+                top: 0;
+            }
+
+            #text3, #text4, #text5, #text6 {
+                left: 50%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <video class="tossteam-video-1p9vbdz" poster="https://common-fe.toss.im/resources/adaptive?light=https%3A%2F%2Fcore-cdn-fe.toss.im%2Fvideo%2Fframe%2F%3Fsource%3Dhttps%3A%2F%2Fstatic.toss.im%2Fhomepage-static%2Fnewtoss%2Fintro-video.mp4%26t%3D00%3A00%3A00.000&dark=https%3A%2F%2Fcore-cdn-fe.toss.im%2Fvideo%2Fframe%2F%3Fsource%3Dhttps%3A%2F%2Fstatic.toss.im%2Fhomepage-static%2Fnewtoss%2Fintro-video.mp4%26t%3D00%3A00%3A00.000&lowlight=https%3A%2F%2Fcore-cdn-fe.toss.im%2Fvideo%2Fframe%2F%3Fsource%3Dhttps%3A%2F%2Fstatic.toss.im%2Fhomepage-static%2Fnewtoss%2Fintro-video.mp4%26t%3D00%3A00%3A00.000&lowdark=https%3A%2F%2Fcore-cdn-fe.toss.im%2Fvideo%2Fframe%2F%3Fsource%3Dhttps%3A%2F%2Fstatic.toss.im%2Fhomepage-static%2Fnewtoss%2Fintro-video.mp4%26t%3D00%3A00%3A00.000" loop playsinline id="intro-background" webkit-playsinline="true" preload="auto" muted="true">
+        <source src="https://static.toss.im/homepage-static/newtoss/intro-video.mp4" type="video/mp4">
+    </video>
+
+    <div class="text-container">
+        <div class="aa">
+            <div id="text1">당신의</div>
+            
+            <div class="changing-text" id="text3">재테크가</div>
+            <div class="changing-text" id="text4">육아가</div>
+            <div class="changing-text" id="text5">취향이</div>
+            <div class="changing-text" id="text6">세상이</div>
+        </div>
+        <div id="text2">깊어지는 중</div>
+    </div>
+
+    <main>
+        <section class="scroll-section"></section>
+
+        <section class="next-section">
+            <h1>다음 섹션</h1>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        const video = document.getElementById('intro-background');
+
+        video.onloadedmetadata = function() {
+            
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: ".scroll-section", 
+                    start: "top top",         
+                    end: "bottom bottom",     
+                    scrub: 1.5,                
+                    // [수정] pin 속성 제거 (text-container가 fixed 이므로 불필요)
+                    onUpdate: self => {
+                        if (video.duration) {
+                           video.currentTime = video.duration * self.progress;
+                        }
+                    }
+                }
+            });
+
+            ScrollTrigger.matchMedia({
+                "(min-width: 769px)": function() {
+                    tl.to("#text1", { x: -100, ease: "power1.inOut" })
+                      .to("#text3", { x: -100, opacity: 1, ease: "power1.inOut" }, "<");
+                },
+                "(max-width: 768px)": function() {
+                    tl.to("#text1", { y: -50, ease: "power1.inOut" })
+                      .to("#text2", { y: 50, ease: "power1.inOut" }, "<")
+                      .to("#text3", { opacity: 1, ease: "power1.inOut" }, "<");
+                }
+            });
+
+            tl.to("#text3", { opacity: 0, duration: 0.3 }, "+=0.8")
+              .to("#text4", { x: -100, opacity: 1, duration: 0.3 }, "<");
+
+            tl.to("#text4", { opacity: 0, duration: 0.3 }, "+=0.8")
+              .to("#text5", { x: -100, opacity: 1, duration: 0.3 }, "<");
+
+            tl.to("#text5", { opacity: 0, duration: 0.3 }, "+=0.8")
+              .to("#text6", { x: -100, opacity: 1, duration: 0.3 }, "<");
+            
+            tl.to(["#text1", "#text2", "#text6"], { 
+                scale: 1.5, 
+                opacity: 0, 
+                //filter: "blur(20px)",
+                scale: 6,
+                ease: "power2.inOut",
+                duration: 1
+            }, "+=1.2");
+        };
+    </script>
+</body>
+</html>
