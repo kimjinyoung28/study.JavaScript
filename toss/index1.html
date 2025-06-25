@@ -73,22 +73,6 @@
             white-space: nowrap; /* 텍스트가 줄바꿈되지 않도록 */
         }
 
-        /* 모바일 화면 대응 */
-        @media (max-width: 768px) {
-            .text-container {
-                font-size: 2.5rem;
-            }
-            /* 모바일에서는 .aa를 column으로 변경하여 텍스트가 세로로 쌓이도록 */
-            .aa {
-                flex-direction: column;
-            }
-            /* 모바일에서 changing-text의 위치 초기화 */
-            .changing-text {
-                left: 50%;
-                top: 50%;
-            }
-        }
-
         /* [수정] PC 화면 (769px 이상) 전용 스타일 */
         @media (min-width: 769px) {
             /* PC에서는 changing-text의 위치를 text1 옆으로 정확히 조정 */
@@ -100,6 +84,21 @@
             /* text1 자체는 relative로 두어 changing-text의 absolute 기준점 제공 */
             #text1 {
                 position: relative;
+            }
+        }
+
+        /* 모바일 화면 대응 */
+        @media (max-width: 768px) {
+            .text-container {
+                font-size: 2.5rem;
+            }
+            /* 모바일에서는 .aa를 column으로 변경하여 텍스트가 세로로 쌓이도록 */
+            .aa {
+                flex-direction: column;
+            }
+            /* 모바일에서 changing-text의 위치 초기화 */
+            .changing-text {
+                top: 50%;
             }
         }
 
@@ -152,92 +151,127 @@
 
     <script>
     let resizeTimer;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-        location.reload();
-        }, 500); // 리사이즈 종료 0.5초 후 새로고침
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        // 페이지를 새로고침하는 대신, ScrollTrigger를 새로 고칩니다.
+        // 이는 애니메이션과 비디오 동기화가 다시 계산되도록 보장합니다.
+        initScrollAnimation(); // 애니메이션을 다시 초기화합니다.
+    }, 500); // 리사이즈가 끝난 후 0.5초 대기
+});
+
+// GSAP 플러그인을 한 번만 등록합니다.
+gsap.registerPlugin(ScrollTrigger);
+
+const video = document.getElementById('intro-background');
+
+// 스크롤 애니메이션을 초기화/재초기화하는 함수
+function initScrollAnimation() {
+    // 중복 및 충돌을 방지하기 위해 기존 ScrollTrigger 인스턴스를 모두 제거합니다.
+    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+
+    // isMobile은 이제 애니메이션이 초기화될 때마다 결정됩니다.
+    // 이는 모바일/PC 기준점을 넘나드는 리사이즈 후에 유용합니다.
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+    // 비디오 메타데이터가 로드되었는지 확인한 후 애니메이션을 설정합니다.
+    // 이미 로드된 경우 즉시 실행됩니다.
+    if (video.readyState >= 2) { // 메타데이터가 로드되었는지 확인 (HAVE_CURRENT_DATA 이상)
+        setupGSAPAnimations(isMobile);
+    } else {
+        video.onloadedmetadata = () => setupGSAPAnimations(isMobile);
+    }
+}
+
+function setupGSAPAnimations(isMobile) {
+    // 새로운 트윈을 만들기 전에 속성을 초기 상태로 재설정합니다.
+    // 이는 이전 애니메이션 실행의 잔여 스타일을 방지하는 데 중요합니다.
+    gsap.set(["#text1", "#text2", "#text3", "#text4", "#text5", "#text6"], { clearProps: "all" });
+    gsap.set(".changing-text", { opacity: 0, x: 0, y: 0 }); // 변경되는 텍스트의 x, y도 재설정
+
+    // 초기 위치 설정, 일관된 시작 지점을 위해 중요합니다.
+    gsap.set("#text1", { x: 0, y: 0 });
+    gsap.set("#text2", { y: 0 });
+    // changing-text 요소는 fromTo 트윈에 의해 초기 상태가 관리됩니다.
+
+    const tl = gsap.timeline({
+        scrollTrigger: {
+            trigger: ".scroll-section",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1.5,
+            onUpdate: self => {
+                if (video.duration) {
+                    video.currentTime = video.duration * self.progress;
+                }
+            },
+            // markers: true // 디버깅용
+        }
     });
 
-        gsap.registerPlugin(ScrollTrigger);
+    // PC와 모바일의 초기/등장/사라짐 애니메이션 속성 정의
+    let text1InitialX = isMobile ? 0 : -100; // PC에서는 text1이 왼쪽으로 이동
+    let text1MoveY = isMobile ? -50 : 0;     // 모바일에서는 text1이 위로 이동
+    let text2MoveY = isMobile ? 50 : 0;      // 모바일에서는 text2가 아래로 이동
 
-        const video = document.getElementById('intro-background');
-        // isMobile은 페이지 로드 시점에 한 번만 결정됩니다.
-        // 창 크기 변경 시 실시간 업데이트를 원한다면 ScrollTrigger.matchMedia를 사용해야 합니다.
-        const isMobile = window.matchMedia("(max-width: 768px)").matches; // 기준을 768px로 통일
+    // `changing-text` 요소:
+    // 등장할 때 최종 위치는 `changingTextEnterX`입니다.
+    // 사라질 때 `changingTextExitX`로 더 멀리 이동합니다.
+    // 등장하기 전에는 `changingTextFromX`에서 시작합니다.
+    let changingTextEnterX = isMobile ? 0 : "-50%"; // 최종 위치. PC에 맞게 조정.
+    let changingTextExitX = isMobile ? 0 : "-150%"; // 왼쪽으로 멀리 사라짐.
+    let changingTextFromX = isMobile ? 0 : "50%"; // 새로운 텍스트의 시작 위치 (오른쪽에서). PC에 맞게 조정.
 
-        video.onloadedmetadata = function() {
-            // 모든 GSAP 애니메이션/트윈을 초기화하여 충돌 방지
-            gsap.set(["#text1", "#text2", "#text3", "#text4", "#text5", "#text6"], { clearProps: "all" });
-            gsap.set(".changing-text", { opacity: 0 }); // 변경되는 텍스트들은 초기엔 숨김
+    // 첫 번째 텍스트 애니메이션 (PC/모바일 조건부)
+    if (isMobile) {
+        tl.to("#text1", { y: text1MoveY, ease: "power1.inOut" }, "start"); // 동기화를 위한 레이블 추가
+        tl.to("#text2", { y: text2MoveY, ease: "power1.inOut" }, "start");
+        // text3은 오른쪽에서 나타나 최종 위치에 정착합니다.
+        tl.fromTo("#text3",
+            { opacity: 0, x: changingTextFromX }, // 화면 오른쪽 밖에서 시작
+            { opacity: 1, x: changingTextEnterX, ease: "power1.inOut" }, "start"); // 중앙으로 이동
+    } else { // PC
+        tl.to("#text1", { x: text1InitialX, ease: "power1.inOut" }, "start"); // PC text1은 왼쪽으로 이동
+        // text3은 오른쪽에서 나타나 최종 위치에 정착합니다.
+        tl.fromTo("#text3",
+            { opacity: 0, x: changingTextFromX }, // 화면 오른쪽 밖에서 시작
+            { opacity: 1, x: changingTextEnterX, ease: "power1.inOut" }, "start"); // -50% (부모 기준)로 이동
+    }
 
-            const tl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: ".scroll-section", 
-                    start: "top top",         
-                    end: "bottom bottom",     
-                    scrub: 1.5,                
-                    onUpdate: self => {
-                        if (video.duration) {
-                           video.currentTime = video.duration * self.progress;
-                        }
-                    }
-                    // markers: true // 디버깅용
-                }
-            });
+    // 변경되는 텍스트 애니메이션 (공통 로직, x 값만 isMobile로 조건부)
+    // #text3이 사라지고 이동한 다음, #text4가 나타나고 이동합니다.
+    tl.to("#text3", { opacity: 0, x: changingTextExitX, duration: 0.3 }, "+=0.8");
+    tl.fromTo("#text4",
+        { opacity: 0, x: changingTextFromX }, // 화면 오른쪽 밖에서 시작
+        { opacity: 1, x: changingTextEnterX, duration: 0.3, ease: "power1.inOut" }, "<"); // 최종 위치로 이동
 
-            // PC와 모바일의 초기/등장/사라짐 애니메이션 속성 정의
-            let text1InitialX = isMobile ? 0 : -100;
-            let text1MoveY = isMobile ? -50 : 0;
-            let text2MoveY = isMobile ? 50 : 0;
-            
-            let changingTextEnterX = isMobile ? "-50%" : -100; // 등장할 때의 x 위치
-            let changingTextExitX = isMobile ? "-50%" : -100; // 사라질 때의 x 위치 (더 멀리)
-            let changingTextFromX = isMobile ? "-50%" : 0; // 새로 등장할 텍스트의 초기 x 위치 (PC는 left:100% 기준)
+    // #text4가 사라지고 이동한 다음, #text5가 나타나고 이동합니다.
+    tl.to("#text4", { opacity: 0, x: changingTextExitX, duration: 0.3 }, "+=0.8");
+    tl.fromTo("#text5",
+        { opacity: 0, x: changingTextFromX },
+        { opacity: 1, x: changingTextEnterX, duration: 0.3, ease: "power1.inOut" }, "<");
 
-            // 초기 위치 설정 (GSAP가 애니메이션 시작 전에 상태를 명확히 알도록)
-            gsap.set("#text1", { x: 0, y: 0 });
-            gsap.set("#text2", { y: 0 });
-            gsap.set(".changing-text", { x: 0 }); // PC는 left:100% 기준 0, 모바일은 relative 기준 0
+    // #text5가 사라지고 이동한 다음, #text6이 나타나고 이동합니다.
+    tl.to("#text5", { opacity: 0, x: changingTextExitX, duration: 0.3 }, "+=0.8");
+    tl.fromTo("#text6",
+        { opacity: 0, x: changingTextFromX },
+        { opacity: 1, x: changingTextEnterX, duration: 0.3, ease: "power1.inOut" }, "<");
 
-            // 첫 번째 텍스트 애니메이션 (PC/모바일 조건부)
-            if (isMobile) {
-                tl.to("#text1", { y: text1MoveY, ease: "power1.inOut" });
-                tl.to("#text2", { y: text2MoveY, ease: "power1.inOut" }, "<");
-                tl.to("#text3", { opacity: 1, x: changingTextEnterX, ease: "power1.inOut" }, "<");
-            } else { // PC
-                tl.to("#text1", { x: text1InitialX, ease: "power1.inOut" }); // PC에서는 x만 사용
-                tl.to("#text3", { opacity: 1, x: changingTextEnterX, ease: "power1.inOut" }, "<");
-            }
+    // 마지막 텍스트 요소들이 확대되고 사라집니다.
+    tl.to(["#text1", "#text2", "#text6"], {
+        scale: 6,
+        opacity: 0,
+        // filter: "blur(20px)", // 블러 효과를 원하면 주석 해제
+        ease: "power2.inOut",
+        duration: 1
+    }, "+=1.2");
 
-            // 변경되는 텍스트들 애니메이션 (공통 로직, x 값만 isMobile로 조건부)
-            // #text3 사라지고 #text4 등장
-            tl.to("#text3", { opacity: 0, x: changingTextExitX, duration: 0.3 }, "+=0.8");
-            tl.fromTo("#text4", 
-                { opacity: 0, x: changingTextFromX }, // from: 시작 위치
-                { opacity: 1, x: changingTextEnterX, duration: 0.3, ease: "power1.inOut" }, "<"); // to: 최종 위치
+    // 타임라인을 설정한 후, ScrollTrigger가 계산을 새로고침하도록 합니다.
+    ScrollTrigger.refresh();
+}
 
-            // #text4 사라지고 #text5 등장
-            tl.to("#text4", { opacity: 0, x: changingTextExitX, duration: 0.3 }, "+=0.8");
-            tl.fromTo("#text5", 
-                { opacity: 0, x: changingTextFromX }, 
-                { opacity: 1, x: changingTextEnterX, duration: 0.3, ease: "power1.inOut" }, "<");
-
-            // #text5 사라지고 #text6 등장
-            tl.to("#text5", { opacity: 0, x: changingTextExitX, duration: 0.3 }, "+=0.8");
-            tl.fromTo("#text6", 
-                { opacity: 0, x: changingTextFromX }, 
-                { opacity: 1, x: changingTextEnterX, duration: 0.3, ease: "power1.inOut" }, "<");
-            
-            // 마지막 텍스트 전체 사라짐 애니메이션 (공통)
-            tl.to(["#text1", "#text2", "#text6"], { 
-                scale: 6, 
-                opacity: 0, 
-                filter: "blur(20px)", 
-                ease: "power2.inOut",
-                duration: 1
-            }, "+=1.2"); 
-        };
+// 페이지 로드 시 애니메이션을 설정하기 위한 초기 호출
+initScrollAnimation();
     </script>
 </body>
 </html>
